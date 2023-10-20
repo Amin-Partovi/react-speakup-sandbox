@@ -1,23 +1,19 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import useTextToVoice from "./hooks/useTextToVoice";
 
 function App() {
+  const { speak, ref } = useTextToVoice();
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div ref={ref}>
+        <h1>it does not matter</h1>
+        <span>that your text content</span>
+        <div>
+          how much is nested and <p>in what html tags</p>
+          <span>I will find them and read them for you</span>
+        </div>
+      </div>
+      <button onClick={() => speak()}>speak</button>
     </div>
   );
 }
