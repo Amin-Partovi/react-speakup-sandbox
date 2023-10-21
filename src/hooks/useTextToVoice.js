@@ -36,6 +36,12 @@ const useTextToVoice = () => {
   function speak() {
     const utterThis = new SpeechSynthesisUtterance(textContent);
     synth.speak(utterThis);
+
+    utterThis.onerror = (event) => {
+      console.log(
+        `An error has occurred with the speech synthesis: ${event.error}`
+      );
+    };
   }
 
   return { speak, ref: textContainerRef };
