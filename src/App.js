@@ -4,7 +4,7 @@ import useVoiceToText from "./hooks/useVoiceToText";
 
 function App() {
   const { speak, ref } = useTextToVoice();
-  const { start, stop } = useVoiceToText();
+  const { start, stop, text } = useVoiceToText();
 
   return (
     <div className="App">
@@ -19,6 +19,7 @@ function App() {
       <button onClick={() => speak()}>speak</button>
       <button onClick={() => start()}>listen</button>
       <button onClick={() => stop()}>stop </button>
+      <p>{text}</p>
     </div>
   );
 }
