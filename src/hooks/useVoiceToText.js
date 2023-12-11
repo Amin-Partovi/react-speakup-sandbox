@@ -1,25 +1,40 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
-const useVoiceToText = () => {
+const useVoiceToText = (
+  { lang, continuous } = { lang: undefined, continuous: true }
+) => {
   const [text, setText] = useState("");
-  const continuous = useRef(true);
+  const isContinuous = useRef(continuous);
+
+  const SpeechRecognition = useMemo(
+    () => window.SpeechRecognition || window.webkitSpeechRecognition,
+    []
+  );
 
   let recognition = new SpeechRecognition();
 
+  if (lang) {
+    recognition.lang = lang;
+  }
+
+  recognition.onerror = (event) => {
+    console.error(`Speech recognition error detected: ${event.error}`);
+  };
+
   function start() {
     recognition.start();
+    if (continuous) {
+      isContinuous.current = true;
+    }
   }
 
   function stop() {
     recognition.stop();
-    continuous.current = false;
+    isContinuous.current = false;
   }
 
   recognition.onend = () => {
-    if (continuous.current) {
+    if (isContinuous.current) {
       start();
     }
   };

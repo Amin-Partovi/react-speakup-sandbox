@@ -1,11 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const useTextToVoice = () => {
+const useTextToVoice = ({ pitch, rate, volume } = {}) => {
   const textContainerRef = useRef();
   const voiceTranscript = useRef("");
   const firstRenderRef = useRef(true);
   const [textContent, setTextContent] = useState("");
   const synth = window.speechSynthesis;
+  
+  const utterThis = useMemo(
+    () => new SpeechSynthesisUtterance(textContent),
+    [textContent]
+  );
 
   const extractText = useCallback((element) => {
     if (!element) return;
@@ -24,6 +29,15 @@ const useTextToVoice = () => {
     }
   }, []);
 
+  utterThis.onerror = (event) => {
+    console.log(
+      `An error has occurred with the speech synthesis: ${event.error}`
+    );
+  };
+
+  const voices = synth.getVoices();
+  const voiceNames = useMemo(() => voices.map((voice) => voice.name), [voices]);
+
   useEffect(() => {
     if (firstRenderRef.current && textContainerRef) {
       const voiceContainer = textContainerRef.current;
@@ -33,18 +47,42 @@ const useTextToVoice = () => {
     setTextContent(voiceTranscript.current);
   }, [extractText, textContainerRef]);
 
-  function speak() {
-    const utterThis = new SpeechSynthesisUtterance(textContent);
-    synth.speak(utterThis);
+  useEffect(() => {
+    if (pitch) {
+      utterThis.pitch = pitch;
+    }
+    if (volume) {
+      utterThis.volume = volume;
+    }
+    if (rate) {
+      utterThis.rate = rate;
+    }
+  }, [utterThis, pitch, volume, rate]);
 
-    utterThis.onerror = (event) => {
-      console.log(
-        `An error has occurred with the speech synthesis: ${event.error}`
-      );
-    };
+  function speak() {
+    synth.speak(utterThis);
   }
 
-  return { speak, ref: textContainerRef };
+  function pause() {
+    synth.pause();
+  }
+
+  function resume() {
+    synth.resume();
+  }
+
+  function setVoice(voice) {
+    utterThis.voice = voices.find((item) => item.name === voice);
+  }
+
+  return {
+    speak,
+    pause,
+    resume,
+    voices: voiceNames,
+    setVoice,
+    ref: textContainerRef,
+  };
 };
 
 export default useTextToVoice;
